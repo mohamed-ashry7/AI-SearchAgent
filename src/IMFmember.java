@@ -1,14 +1,14 @@
 
-public class IMFmember implements Comparable<IMFmember>, Cloneable {
+public class IMFmember implements Comparable<IMFmember> {
 		static int counter = 0;
 		Position pos;
 		int damage;
 		int ID;
 
-		public IMFmember(Position p, int h) {
+		public IMFmember(Position p, int d) {
 			this.ID = ++counter;
 			this.pos = p;
-			this.damage = h;
+			this.damage = d;
 		}
 
 		public int getDamage() {
@@ -29,8 +29,6 @@ public class IMFmember implements Comparable<IMFmember>, Cloneable {
 		public int compareTo(IMFmember o) {
 			return this.pos.compareTo(o.pos);
 		}
-		public IMFmember clone()throws CloneNotSupportedException{  
-			return (IMFmember)super.clone();  
-		}
+		
 
 	}

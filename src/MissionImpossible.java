@@ -92,12 +92,15 @@ public class MissionImpossible extends GenericSearchProblem {
 				container.add(front);
 				if (front.state.isGoal()) {
 					return front;
-				} else {
+				} 
+				else {
 					for (int i = 0; i < 6; ++i) {
 						Node child = expand(front, i);
 						if (!container.contains(child)) {
 							nodes.add(child);
+//							System.out.println(child.state);
 						}
+						
 					}
 
 				}

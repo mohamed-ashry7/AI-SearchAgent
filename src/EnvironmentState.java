@@ -1,3 +1,4 @@
+import java.awt.Image;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -63,16 +64,17 @@ public class EnvironmentState implements Comparable<EnvironmentState> {
 				this.ethanPos.setY(y);
 			}
 		} else {
-
+			
 			if (action == 4 && this.carriedSoldiers < this.capacity) {
-
+				
 				IMFmember mem = getTheIMFmemberByPosition(this.ethanPos);
 				if (mem != null) {
+					
 					savedMembers.add(mem);
 					members.remove(mem);
 					this.carriedSoldiers++;
 				}
-			} else if (action == 5 && ethanPos.equals(submarinePos)) {
+			} else if (action == 5 && ethanPos.compareTo(submarinePos)==0) {
 				carriedSoldiers = 0;
 			}
 		}
@@ -112,7 +114,7 @@ public class EnvironmentState implements Comparable<EnvironmentState> {
 
 	private IMFmember getTheIMFmemberByPosition(Position p) {
 		for (int i = 0; i < members.size(); i++) {
-			if (members.get(i).getPosition().equals(p)) {
+			if (members.get(i).getPosition().compareTo(p)==0) {
 				return members.get(i);
 			}
 		}
@@ -127,11 +129,21 @@ public class EnvironmentState implements Comparable<EnvironmentState> {
 			
 		  return new EnvironmentState(width, height, new Position(ethanPos.x, ethanPos.y),
 				  new Position(submarinePos.x, submarinePos.y)
-				  , (ArrayList<IMFmember>)this.members.clone(),
-				  (ArrayList<IMFmember>)this.savedMembers.clone(),
+				  , this.cloneArrayMembers(members),
+				  this.cloneArrayMembers(savedMembers),
 				  this.deadSoldiersNumber,this.capacity, this.carriedSoldiers); 
 	}
-	
+	private ArrayList<IMFmember> cloneArrayMembers(ArrayList<IMFmember> arr) { 
+		ArrayList<IMFmember> temp = new ArrayList<>(); 
+		
+		for (int i = 0 ; i < arr.size() ; ++i ) { 
+			IMFmember mem =arr.get(i) ; 
+			IMFmember newMem = new IMFmember(new Position(mem.getPosition().x, mem.getPosition().y), mem.getDamage()); 
+			newMem.ID = mem.ID ; 
+			temp.add(newMem) ; 
+		}
+		return temp ; 
+	}
 	public int getNumberOfSavedSoldiers() { 
 		return this.savedMembers.size(); 
 	}
@@ -141,7 +153,7 @@ public class EnvironmentState implements Comparable<EnvironmentState> {
 	
 	public boolean isGoal() { 
 		return  this.members.size()==0 &&
-				this.ethanPos.equals(this.submarinePos)&&
+				this.ethanPos.compareTo(this.submarinePos) == 0 &&
 				this.actionTaken==5; 	
 	}
 	
@@ -151,7 +163,6 @@ public class EnvironmentState implements Comparable<EnvironmentState> {
 
 	@Override
 	public int compareTo(EnvironmentState o) {
-//		System.out.println(this.getEthanPosition().compareTo(o.getEthanPosition()));
 		if( this.getEthanPosition().compareTo(o.getEthanPosition())== 0 &&
 			this.getNumberOfSavedSoldiers() == o.getNumberOfSavedSoldiers() &&
 			this.getCarriedSoldiers() == o.getCarriedSoldiers()) { 
