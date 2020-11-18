@@ -4,36 +4,34 @@ import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.TreeSet;
 
-public class EnvironmentState implements Cloneable, Comparable<EnvironmentState> {
+public class EnvironmentState implements Comparable<EnvironmentState> {
 
 	private int width;
 	private int height;
 	private Position ethanPos;
 	private Position submarinePos;
 	private ArrayList<IMFmember> members;
-	private PriorityQueue<IMFmember> savedMembers;
+	private ArrayList<IMFmember> savedMembers;
 	private int deadSoldiersNumber;
 	private int capacity;
 	private int carriedSoldiers;	
 	private int actionTaken; 
 	
+	
+	public EnvironmentState(int w, int h, Position ethan, Position sub, ArrayList<IMFmember> mem,ArrayList<IMFmember>sm,int dead, int cap,int carried) {
+		this.width= w ; this.height = h; this.ethanPos =ethan; this.submarinePos =sub ; 
+		this.members =mem ; this.deadSoldiersNumber= dead ; this.capacity=cap ; this.carriedSoldiers = carried;
+		this.savedMembers=sm; 
+	}
 	public EnvironmentState(String gridStr) {
 		members = new ArrayList<>() ; 
-		savedMembers = new PriorityQueue<>(new Comparator<IMFmember>() {
-
-			@Override
-			public int compare(IMFmember o1,IMFmember o2) {
-
-				return o1.ID - o2.ID;
-			}
-
-		});
+		savedMembers=new ArrayList<>()   ; 
 		this.mapGrid2D(gridStr);
 		this.carriedSoldiers = 0;
 		this.deadSoldiersNumber = 0 ; 
 	}
 
-	public EnvironmentState step(int action) throws CloneNotSupportedException {
+	public void step(int action) {
 
 		// the actions are mapped as numbers
 		// 0 -> Up
@@ -80,7 +78,6 @@ public class EnvironmentState implements Cloneable, Comparable<EnvironmentState>
 		}
 		
 		this.updateDamages();
-		return this; 
 	}
 	
 	public void updateDamages() {
@@ -126,8 +123,13 @@ public class EnvironmentState implements Cloneable, Comparable<EnvironmentState>
 		return Arrays.stream(str.split(",")).mapToInt(Integer::parseInt).toArray();
 	}
 	
-	public EnvironmentState clone()throws CloneNotSupportedException{  
-		return (EnvironmentState)super.clone();  
+	public EnvironmentState clone(){  
+			
+		  return new EnvironmentState(width, height, new Position(ethanPos.x, ethanPos.y),
+				  new Position(submarinePos.x, submarinePos.y)
+				  , (ArrayList<IMFmember>)this.members.clone(),
+				  (ArrayList<IMFmember>)this.savedMembers.clone(),
+				  this.deadSoldiersNumber,this.capacity, this.carriedSoldiers); 
 	}
 	
 	public int getNumberOfSavedSoldiers() { 

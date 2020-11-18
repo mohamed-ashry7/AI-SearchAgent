@@ -12,11 +12,11 @@ public class mainTest {
 		
 		System.out.println(MissionImpossible.solve(grid, "BF", false));
 		
-		Position x = new Position(5,5) ; 
-		Position y = (Position)x.clone();
-		y.setX(10);
-		System.out.println(x);
-		System.out.println(y);
+//		Position x = new Position(5,5) ; 
+//		Position y = (Position)x.clone();
+//		y.setX(10);
+//		System.out.println(x);
+//		System.out.println(y);
 //		Position z =(Position) x.clone(); 
 //		System.out.println(x==z);
 //		TreeSet<Position> h = new TreeSet<>(); 
