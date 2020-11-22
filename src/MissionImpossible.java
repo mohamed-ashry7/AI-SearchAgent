@@ -1,7 +1,10 @@
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.Stack;
 import java.util.TreeSet;
 
 public class MissionImpossible extends GenericSearchProblem {
@@ -12,7 +15,7 @@ public class MissionImpossible extends GenericSearchProblem {
 		return (int) (Math.random() * (max - min + 1) + min);
 	}
 
-	private static ArrayList<Position> generateRandomUniquePositions(int m, int n) {
+	private static ArrayList<Position> generateRandomUniquePositions(int m, int n) { // change to real random method ..
 
 		ArrayList<Position> allPositions = new ArrayList<>();
 
@@ -54,32 +57,79 @@ public class MissionImpossible extends GenericSearchProblem {
 		}
 
 		int c = randomNumber(1, numberIMFmembers);
-		grid += c;
+		grid += c; // capacity.
 		return grid;
 
 	}
 
 	public static String solve(String grid, String strategy, boolean visualize) {
+		container = new TreeSet<>();
+
 		EnvironmentState firstState = new EnvironmentState(grid);
 		Node root = new Node(null, null, 0, 0, firstState);
-		Queue<Node> nodes = new LinkedList<>();
-		nodes.add(root);
-		container = new TreeSet<>();
+
 		Node goalNode = null;
-		switch (strategy) {
-		case "BF":
+
+		if (strategy.equals("BF")) {
+			Queue<Node> nodes = new LinkedList<>();
+			nodes.add(root);
 			goalNode = BFS(nodes);
-			break;
+		} else if (strategy.equals("DF")) {
+			Stack<Node> nodesStack = new Stack<>();
+			nodesStack.push(root);
+			goalNode = DFS(nodesStack);
+		} else if (strategy.equals("ID")) {
+
+			goalNode = ID(root);
+
+		} else if (strategy.equals("UC")) {
+
+			Comparator<Node> ucsComparator = Comparator.comparingDouble(n -> n.state.getCostFunction());
+			PriorityQueue<Node> ucsPQ = new PriorityQueue<>(ucsComparator);
+			ucsPQ.add(root);
+			goalNode = UCS(ucsPQ);
+		} else if (strategy.charAt(0) == 'G') {
+			Comparator<Node> greedyCom;
+
+			if (strategy.equals("GR1")) {
+				greedyCom = Comparator.comparingDouble(n -> n.state.getHeuristicValueOne());
+
+			} else {
+				greedyCom = Comparator.comparingDouble(n -> n.state.getHeuristicValueTwo());
+			}
+			PriorityQueue<Node> greedyPQ = new PriorityQueue<>(greedyCom);
+			greedyPQ.add(root);
+			goalNode = greedy(greedyPQ);
+		} else {
+			Comparator<Node> asCom;
+
+			if (strategy.equals("AS1")) {
+				asCom = Comparator.comparingDouble(n -> (n.state.getHeuristicValueOne() + n.state.getCostFunction()));
+
+			} else {
+				asCom = Comparator.comparingDouble(n -> (n.state.getHeuristicValueTwo() + n.state.getCostFunction()));
+			}
+			PriorityQueue<Node> asPQ = new PriorityQueue<>(asCom);
+			asPQ.add(root);
+			goalNode = AS(asPQ);
 		}
-		System.out.println(goalNode);
-		return backtrack(goalNode);
+
+		return formulateAnswer(goalNode) ; 
+	}
+	
+	static String formulateAnswer(Node goalNode) { 
+		String answer = backtrack(goalNode).substring(1)+";"  ;
+		answer +=goalNode.state.getDeadSoldiers()+";"  ; 
+		answer += goalNode.state.getSoldiersHealths()+";" ; 
+		answer += Node.createdNodes ; 
+		return answer ; 
 	}
 
 	static String backtrack(Node a) {
-		if (a == null) {
+		if (a==null || a.action == null) {
 			return "";
 		}
-		return backtrack(a.parent) + " " + a.action;
+		return backtrack(a.parent) + "," + a.action;
 	}
 
 	static Node BFS(Queue<Node> nodes) {
@@ -92,15 +142,13 @@ public class MissionImpossible extends GenericSearchProblem {
 				container.add(front);
 				if (front.state.isGoal()) {
 					return front;
-				} 
-				else {
+				} else {
 					for (int i = 0; i < 6; ++i) {
 						Node child = expand(front, i);
 						if (!container.contains(child)) {
 							nodes.add(child);
-//							System.out.println(child.state);
 						}
-						
+
 					}
 
 				}
@@ -108,15 +156,99 @@ public class MissionImpossible extends GenericSearchProblem {
 		}
 	}
 
-	static Node expand(Node parent, int action) {
+	static Node DFS(Stack<Node> stackNodes) {
+		return DFSHelper(stackNodes, true, 0);
+	}
 
-		EnvironmentState state = parent.state.clone();
-		state.step(action);
-		return new Node(parent, getTheAction(action), parent.depth + 1, parent.cost + 1, state);
+	static Node DFSHelper(Stack<Node> stackNodes, boolean dfs, int iter) {
+
+		while (true) {
+			if (stackNodes.isEmpty()) {
+				return null;
+			}
+			Node front = stackNodes.pop();
+			container.add(front);
+			if (front.state.isGoal()) {
+				return front;
+			}
+			if (!dfs && front.depth >= iter) {
+				continue;
+			}
+			for (int i = 5; i > -1; i--) { // the action order is reversed due to the stack.... start with the last
+											// action.
+				Node child = expand(front, i);
+				if (!container.contains(child)) {
+					stackNodes.push(child);
+				}
+			}
+		}
 
 	}
 
-	private static String getTheAction(int action)  {
+	static Node ID(Node root) {
+		int iter = 0;
+		Node goalNode;
+		do {
+			container = new TreeSet<>(); ; 
+			Stack<Node> nodesStack = new Stack<>();
+			nodesStack.push(root);
+			goalNode = DFSHelper(nodesStack, false, iter);
+			++iter;
+		} while (goalNode == null);
+		return goalNode;
+
+	}
+
+	static Node UCS(PriorityQueue<Node> pq) {
+		return rawPQFn(pq);
+	}
+
+	static Node greedy(PriorityQueue<Node> pq) {
+		return rawPQFn(pq);
+	}
+
+	static Node AS(PriorityQueue<Node> pq) {
+		return rawPQFn(pq);
+	}
+
+	static Node rawPQFn(PriorityQueue<Node> pq) {
+
+		while (true) {
+			if (pq.size() == 0) {
+
+				return null;
+			} else {
+				Node front = pq.poll();
+				container.add(front);
+				if (front.state.isGoal()) {
+					return front;
+				} else {
+					for (int i = 0; i < 6; ++i) {
+						Node child = expand(front, i);
+						if (!container.contains(child)) {
+							pq.add(child);
+						}
+
+					}
+
+				}
+			}
+		}
+
+	}
+
+	static Node expand(Node parent, int action) {
+
+		EnvironmentState state = parent.state.clone(); // don't forget here to modify the cost according to the action
+														// taken not juast +1;
+		state.step(action);
+		double cost = state.getCostFunction();
+
+		return new Node(parent, getTheAction(action), parent.depth + 1, parent.cost + cost, state);
+
+	}
+
+	private static String getTheAction(int action) {
 		// 0 -> Up
 		// 1-> Down
 		// 2 -> Right
@@ -137,7 +269,7 @@ public class MissionImpossible extends GenericSearchProblem {
 		case 5:
 			return "Drop";
 		}
-		return "Invalid" ; 
+		return "Invalid";
 	}
 
 }

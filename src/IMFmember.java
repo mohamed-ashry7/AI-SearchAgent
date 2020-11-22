@@ -10,6 +10,9 @@ public class IMFmember implements Comparable<IMFmember> {
 			this.pos = p;
 			this.damage = d;
 		}
+		public int getID() { 
+			return this.ID ; 
+		}
 
 		public int getDamage() {
 			return this.damage;
@@ -25,6 +28,12 @@ public class IMFmember implements Comparable<IMFmember> {
 		public boolean isDead() {
 			return damage>=100;
 		}
+		public int getHealth() { 
+			return 100-this.damage ; 
+		}
+//		public double getScaledHealth() { 
+//			return this.getHealth()/10.0 ; 
+//		}
 		@Override
 		public int compareTo(IMFmember o) {
 			return this.pos.compareTo(o.pos);
