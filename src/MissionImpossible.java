@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -10,7 +11,10 @@ import java.util.TreeSet;
 public class MissionImpossible extends GenericSearchProblem {
 
 	static TreeSet<Node> container;
-
+	static int Width; 
+	static int Height ; 
+	static int []  SubmarinePosition ; 
+	static int Capacity ;
 	private static int randomNumber(int min, int max) {
 		return (int) (Math.random() * (max - min + 1) + min);
 	}
@@ -61,11 +65,32 @@ public class MissionImpossible extends GenericSearchProblem {
 		return grid;
 
 	}
+	static int[] convertStringIntArr(String str) {
+		return Arrays.stream(str.split(",")).mapToInt(Integer::parseInt).toArray();
+	}
+	static String map2DGrid(String grid) { 
 
+		String[] info = grid.split(";");
+		int[] mn = convertStringIntArr(info[0]);
+		Width = mn[0];
+		Height = mn[1];
+		SubmarinePosition = convertStringIntArr(info[2]);
+		Capacity = convertStringIntArr(info[5])[0];
+		String state = "" ; 
+		state += info[1]+";" ; // EthanPosition ; 
+		state += info[3]+";" ; // 
+		state += info[4] + ";" ; 
+		state += "0" ; 
+		
+		return state ; 
+//		Comparator<IMFmember> com = Comparator.comparingDouble(mem -> this.getEucDis(mem.getPosition(), this.getEthanPosition())); 
+//		Collections.sort(members,com);
+	}
 	public static String solve(String grid, String strategy, boolean visualize) {
+		String state = map2DGrid(grid) ; 
 		container = new TreeSet<>();
 
-		EnvironmentState firstState = new EnvironmentState(grid);
+		EnvironmentState firstState = new EnvironmentState(state);
 		Node root = new Node(null, null, 0, 0, firstState);
 
 		Node goalNode = null;
@@ -100,7 +125,7 @@ public class MissionImpossible extends GenericSearchProblem {
 			PriorityQueue<Node> greedyPQ = new PriorityQueue<>(greedyCom);
 			greedyPQ.add(root);
 			goalNode = greedy(greedyPQ);
-		} else {
+		} else if (strategy.charAt(0) == 'A') {
 			Comparator<Node> asCom;
 
 			if (strategy.equals("AS1")) {
@@ -113,14 +138,17 @@ public class MissionImpossible extends GenericSearchProblem {
 			asPQ.add(root);
 			goalNode = AS(asPQ);
 		}
+		
+		
 
 		return formulateAnswer(goalNode) ; 
 	}
 	
 	static String formulateAnswer(Node goalNode) { 
+		
 		String answer = backtrack(goalNode).substring(1)+";"  ;
-		answer +=goalNode.state.getDeadSoldiers()+";"  ; 
-		answer += goalNode.state.getSoldiersHealths()+";" ; 
+		answer +=goalNode.state.getDeadSoldiersNumber()+";"  ; 
+		answer += goalNode.state.getDamages()+";" ; 
 		answer += Node.createdNodes ; 
 		return answer ; 
 	}
@@ -140,7 +168,7 @@ public class MissionImpossible extends GenericSearchProblem {
 			} else {
 				Node front = nodes.poll();
 				container.add(front);
-				if (front.state.isGoal()) {
+				if (front.state.isGoal() && front.action.equals("Drop") ) {
 					return front;
 				} else {
 					for (int i = 0; i < 6; ++i) {
@@ -168,7 +196,7 @@ public class MissionImpossible extends GenericSearchProblem {
 			}
 			Node front = stackNodes.pop();
 			container.add(front);
-			if (front.state.isGoal()) {
+			if (front.state.isGoal() && front.action.equals("Drop") ) {
 				return front;
 			}
 			if (!dfs && front.depth >= iter) {
@@ -220,7 +248,7 @@ public class MissionImpossible extends GenericSearchProblem {
 			} else {
 				Node front = pq.poll();
 				container.add(front);
-				if (front.state.isGoal()) {
+				if (front.state.isGoal() && front.action.equals("Drop") ) {
 					return front;
 				} else {
 					for (int i = 0; i < 6; ++i) {
@@ -239,11 +267,9 @@ public class MissionImpossible extends GenericSearchProblem {
 
 	static Node expand(Node parent, int action) {
 
-		EnvironmentState state = parent.state.clone(); // don't forget here to modify the cost according to the action
-														// taken not juast +1;
+		EnvironmentState state = parent.state.cloneState(); // don't forget here to modify the cost according to the action												// taken not juast +1;
 		state.step(action);
 		double cost = state.getCostFunction();
-
 		return new Node(parent, getTheAction(action), parent.depth + 1, parent.cost + cost, state);
 
 	}
