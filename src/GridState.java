@@ -53,8 +53,9 @@ public class GridState extends State {
 				this.updateCarriedSoldiers(0);
 			}
 		}
-		
 		this.updateDamages();
+		System.out.println(this.state);
+		this.visualize();
 //		System.out.println(this.state);
 		
 //		System.out.println(this.state);
@@ -335,7 +336,7 @@ public class GridState extends State {
 				continue; 
 			int [] mem = new int [] {members[i],members[i+1] } ; 
 			if (areEqualPositions(ethan, mem)) { 
-				grid[mem[0]][mem[1]] = "E+M" ;
+				grid[mem[0]][mem[1]] = "E"+this.getCarriedSoldiersNumber()+"M" ;
 				ethanPrinted = true ; 
 			}
 			else  {
@@ -346,7 +347,7 @@ public class GridState extends State {
 			grid[sub[0]][sub[1]] = "E+S" ;
 		else {
 			if (!ethanPrinted)
-				grid[ethan[0]][ethan[1]] = "E" ;
+				grid[ethan[0]][ethan[1]] = "E"+this.getCarriedSoldiersNumber() ;
 			grid[sub[0]][sub[1]] = "S" ;
 		}
 		String dash = "-".repeat(MissionImpossible.Width*5); 
