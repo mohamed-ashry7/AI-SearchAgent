@@ -1,13 +1,13 @@
 
-public class Node implements Comparable<Node> {
+public class Node {
 	static long createdNodes = 0;
 	Node parent;
-	String action;
+	int action;
 	int depth;
 	double cost;
-	EnvironmentState state;
+	GridState state;
 
-	public Node(Node parent, String action, int depth, double cost, EnvironmentState state) {
+	public Node(Node parent, int action, int depth, double cost, GridState state) {
 		this.parent = parent;
 		this.action = action;
 		this.depth = depth;
@@ -16,9 +16,6 @@ public class Node implements Comparable<Node> {
 		createdNodes++;
 	}
 
-	@Override
-	public int compareTo(Node o) {
-		return o.state.compareTo(this.state);
-	}
+	
 
 }

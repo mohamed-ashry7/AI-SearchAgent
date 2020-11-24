@@ -2,15 +2,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Stack;
-import java.util.TreeSet;
 
 public class MissionImpossible extends GenericSearchProblem {
 
-	static TreeSet<Node> container;
 	static int Width; 
 	static int Height ; 
 	static int []  SubmarinePosition ; 
@@ -68,7 +67,7 @@ public class MissionImpossible extends GenericSearchProblem {
 	static int[] convertStringIntArr(String str) {
 		return Arrays.stream(str.split(",")).mapToInt(Integer::parseInt).toArray();
 	}
-	static String map2DGrid(String grid) { 
+	public String map2DGrid(String grid) { 
 
 		String[] info = grid.split(";");
 		int[] mn = convertStringIntArr(info[0]);
@@ -87,11 +86,69 @@ public class MissionImpossible extends GenericSearchProblem {
 //		Collections.sort(members,com);
 	}
 	public static String solve(String grid, String strategy, boolean visualize) {
-		String state = map2DGrid(grid) ; 
-		container = new TreeSet<>();
+		MissionImpossible mi = new MissionImpossible() ; 
+		
+		String state = mi.map2DGrid(grid) ; 
+		GridState firstState = new GridState(state);
+		Node root = new Node(null, -1, 0, 0, firstState);
+		Node goalNode = mi.search(root,strategy) ; 
+		
+		return mi.formulateAnswer(goalNode , visualize) ; 
+	}
+	
+	
+	
+	public String formulateAnswer(Node goalNode,boolean visualize) { 
+		
+		String answer = this.backtrack(goalNode,visualize).substring(1)+";"  ;
+		answer +=goalNode.state.getDeadSoldiersNumber()+";"  ; 
+		answer += goalNode.state.getSoldiersDamages()+";" ; 
+		answer += Node.createdNodes ; 
+		return answer ; 
+	}
 
-		EnvironmentState firstState = new EnvironmentState(state);
-		Node root = new Node(null, null, 0, 0, firstState);
+	public String backtrack(Node a,boolean visualize) {
+		if (a==null || a.action == -1) {
+			if (visualize) { 
+				a.state.visualize();
+			}
+			return "";
+		}
+		String sol = backtrack(a.parent,visualize) + "," + getTheAction(a.action) ;
+		if (visualize) { 
+			System.out.println("Action taken: " + getTheAction(a.action));
+			a.state.visualize();
+		}
+		return sol ; 
+	}
+
+	private String getTheAction(int action) {
+		// 0 -> Up
+		// 1-> Down
+		// 2 -> Right
+		// 3-> Left
+		// 4 ->Carry
+		// 5 ->Drop
+		switch (action) {
+		case 0:
+			return "up";
+		case 1:
+			return "down";
+		case 2:
+			return "right";
+		case 3:
+			return "left";
+		case 4:
+			return "carry";
+		case 5:
+			return "drop";
+		}
+		return "Invalid";
+	}
+
+	@Override
+	public Node search(Node root , String strategy ) {
+		container = new HashSet<>();
 
 		Node goalNode = null;
 
@@ -138,164 +195,9 @@ public class MissionImpossible extends GenericSearchProblem {
 			asPQ.add(root);
 			goalNode = AS(asPQ);
 		}
-		
-		
-
-		return formulateAnswer(goalNode) ; 
+		return goalNode ; 
+ 
 	}
 	
-	static String formulateAnswer(Node goalNode) { 
-		
-		String answer = backtrack(goalNode).substring(1)+";"  ;
-		answer +=goalNode.state.getDeadSoldiersNumber()+";"  ; 
-		answer += goalNode.state.getDamages()+";" ; 
-		answer += Node.createdNodes ; 
-		return answer ; 
-	}
-
-	static String backtrack(Node a) {
-		if (a==null || a.action == null) {
-			return "";
-		}
-		return backtrack(a.parent) + "," + a.action;
-	}
-
-	static Node BFS(Queue<Node> nodes) {
-		while (true) {
-			if (nodes.size() == 0) {
-
-				return null;
-			} else {
-				Node front = nodes.poll();
-				container.add(front);
-				if (front.state.isGoal() && front.action.equals("Drop") ) {
-					return front;
-				} else {
-					for (int i = 0; i < 6; ++i) {
-						Node child = expand(front, i);
-						if (!container.contains(child)) {
-							nodes.add(child);
-						}
-
-					}
-
-				}
-			}
-		}
-	}
-
-	static Node DFS(Stack<Node> stackNodes) {
-		return DFSHelper(stackNodes, true, 0);
-	}
-
-	static Node DFSHelper(Stack<Node> stackNodes, boolean dfs, int iter) {
-
-		while (true) {
-			if (stackNodes.isEmpty()) {
-				return null;
-			}
-			Node front = stackNodes.pop();
-			container.add(front);
-			if (front.state.isGoal() && front.action.equals("Drop") ) {
-				return front;
-			}
-			if (!dfs && front.depth >= iter) {
-				continue;
-			}
-			for (int i = 5; i > -1; i--) { // the action order is reversed due to the stack.... start with the last
-											// action.
-				Node child = expand(front, i);
-				if (!container.contains(child)) {
-					stackNodes.push(child);
-				}
-			}
-		}
-
-	}
-
-	static Node ID(Node root) {
-		int iter = 0;
-		Node goalNode;
-		do {
-			container = new TreeSet<>(); ; 
-			Stack<Node> nodesStack = new Stack<>();
-			nodesStack.push(root);
-			goalNode = DFSHelper(nodesStack, false, iter);
-			++iter;
-		} while (goalNode == null);
-		return goalNode;
-
-	}
-
-	static Node UCS(PriorityQueue<Node> pq) {
-		return rawPQFn(pq);
-	}
-
-	static Node greedy(PriorityQueue<Node> pq) {
-		return rawPQFn(pq);
-	}
-
-	static Node AS(PriorityQueue<Node> pq) {
-		return rawPQFn(pq);
-	}
-
-	static Node rawPQFn(PriorityQueue<Node> pq) {
-
-		while (true) {
-			if (pq.size() == 0) {
-
-				return null;
-			} else {
-				Node front = pq.poll();
-				container.add(front);
-				if (front.state.isGoal() && front.action.equals("Drop") ) {
-					return front;
-				} else {
-					for (int i = 0; i < 6; ++i) {
-						Node child = expand(front, i);
-						if (!container.contains(child)) {
-							pq.add(child);
-						}
-
-					}
-
-				}
-			}
-		}
-
-	}
-
-	static Node expand(Node parent, int action) {
-
-		EnvironmentState state = parent.state.cloneState(); // don't forget here to modify the cost according to the action												// taken not juast +1;
-		state.step(action);
-		double cost = state.getCostFunction();
-		return new Node(parent, getTheAction(action), parent.depth + 1, parent.cost + cost, state);
-
-	}
-
-	private static String getTheAction(int action) {
-		// 0 -> Up
-		// 1-> Down
-		// 2 -> Right
-		// 3-> Left
-		// 4 ->Carry
-		// 5 ->Drop
-		switch (action) {
-		case 0:
-			return "Up";
-		case 1:
-			return "Down";
-		case 2:
-			return "Right";
-		case 3:
-			return "Left";
-		case 4:
-			return "Carry";
-		case 5:
-			return "Drop";
-		}
-		return "Invalid";
-	}
 
 }

@@ -1,13 +1,14 @@
+import java.util.Arrays;
 
-
-public class EnvironmentState implements Comparable<EnvironmentState> {
+public class GridState extends State {
 
 	private String state ; 
 //	0   ;  1 ;   2   ;  3 
 //  ePos;mPos;mDamage;Carried
 
-	public EnvironmentState(String gridStr) {
+	public GridState(String gridStr) {
 		this.state = gridStr; 
+//		System.out.println(state);
 	}
 	
 	public void step(int action) {
@@ -44,8 +45,9 @@ public class EnvironmentState implements Comparable<EnvironmentState> {
 		else {
 
 			if (action == 4 && this.getCarriedSoldiersNumber() < MissionImpossible.Capacity) {
-
+				
 				saveSoldierIfFound();
+//				System.out.println(this.getCarriedSoldiersNumber() == MissionImpossible.Capacity);
 
 			} else if (action == 5 && this.isEthanInSubmarine()) {
 				this.updateCarriedSoldiers(0);
@@ -53,6 +55,9 @@ public class EnvironmentState implements Comparable<EnvironmentState> {
 		}
 		
 		this.updateDamages();
+//		System.out.println(this.state);
+		
+//		System.out.println(this.state);
 	}
 	
 	public String getSubState(int index ) { 
@@ -138,8 +143,8 @@ public class EnvironmentState implements Comparable<EnvironmentState> {
 	
 
 
-	public EnvironmentState cloneState() {
-			return new EnvironmentState(this.state) ; 
+	public GridState cloneState() {
+			return new GridState(this.state) ; 
 	}
 
 
@@ -170,9 +175,9 @@ public class EnvironmentState implements Comparable<EnvironmentState> {
 		int [] subPos = this.getSubmarinePosition()  ; 
 		return ethanPos[0] == subPos[0] && ethanPos[1]==subPos[1] ;
 	}
-	public boolean isGoal() {
+	public boolean isGoal(int action) {
 		 
-		return this.areAllSaved() && this.isEthanInSubmarine() ;
+		return this.areAllSaved() && this.isEthanInSubmarine() && action == 5 ;
 	}
 
 	
@@ -192,16 +197,16 @@ public class EnvironmentState implements Comparable<EnvironmentState> {
 	public boolean areEqualPositions(int [] a , int [] b ) { 
 		return a[0] == b[0] && a[1]==b[1] ; 
 	}
-	@Override
-	public int compareTo(EnvironmentState o) {
-		
-		if (this.areEqualPositions(this.getEthanPosition(), o.getEthanPosition())
-				&& this.getSavedSoldiersNumber() == o.getSavedSoldiersNumber()
-				&& this.getCarriedSoldiersNumber() == o.getCarriedSoldiersNumber()) {
-			return 0;
-		}
-		return 1;
-	}
+//	@Override
+//	public int compareTo(EnvironmentState o) {
+//		
+//		if (this.areEqualPositions(this.getEthanPosition(), o.getEthanPosition())
+//				&& this.getSavedSoldiersNumber() == o.getSavedSoldiersNumber()
+//				&& this.getCarriedSoldiersNumber() == o.getCarriedSoldiersNumber()) {
+//			return 0;
+//		}
+//		return 1;
+//	}
 	public  double getEucDis(int[]  p1 , int [] p2) { 
 		int dis1 = p1[0]-p2[0];  
 		int dis2= p1[1]-p2[1] ; 
@@ -232,7 +237,8 @@ public class EnvironmentState implements Comparable<EnvironmentState> {
   			double newCalc = this.getEucDis(this.getEthanPosition(),mem) ;
 			heuristicValue=Math.min(newCalc, heuristicValue) ;  
 		}
-		return heuristicValue ; 
+		
+		return heuristicValue+this.getRemainingMemberSize()*2 ; 
 	}
 	
 	public double getHeuristicValueTwo() {
@@ -260,7 +266,7 @@ public class EnvironmentState implements Comparable<EnvironmentState> {
 			
 			heuristicValue=Math.min(health, heuristicValue) ;  
 		}
-		return heuristicValue+this.getDeadSoldiersNumber() ;  
+		return heuristicValue+this.getRemainingMemberSize()*2 ;  
 	}
  	
 	
@@ -268,23 +274,18 @@ public class EnvironmentState implements Comparable<EnvironmentState> {
 		return Math.abs(p1[0]-p2[0]) + Math.abs(p1[1]-p2[1]) ; 
 	}
 	
-//	public String getSoldiersHealths () { 
-//		String finalHealth ="" ;
-//		Comparator<IMFmember> soldiersIDs = Comparator.comparingInt(m -> m.getID()) ; 
-//		Collections.sort(this.savedMembers,soldiersIDs);
-//		for (int i = 0 ; i < savedMembers.size() ; ++i ) { 
-//			IMFmember m = savedMembers.get(i) ;
-//			if (i == savedMembers.size()-1) 
-//				finalHealth += m.getDamage();
-//			else 
-//				finalHealth += m.getDamage()+",";			
-//		}
-//		return finalHealth ; 
-//		
-//	}
+	public String getSoldiersDamages() { 
+		return this.getSubState(2) ; 
+		
+	}
 	public double getCostFunction() { 
+		if (this.getRemainingMemberSize()== 0) { 
+			if (this.isEthanInSubmarine()) 
+				return 0 ; 
+			return this.manhattenDistance(this.getEthanPosition(),this.getSubmarinePosition());
+		}
 		double actualDis = Double.MAX_VALUE ;
-		double deadNumber = this.getDeadSoldiersNumber() ;  //this is spartaaaaaaaaaaaa
+		double deadNumber = this.getDeadSoldiersNumber() ;  
 		double damage = 0 ;
 		
 		
@@ -308,7 +309,54 @@ public class EnvironmentState implements Comparable<EnvironmentState> {
 		return "Position: " + this.getEthanPosition() + ", Number of Saved Soldiers: " + this.getSavedSoldiersNumber()
 				+ ", Carried Soldiers: " + this.getCarriedSoldiersNumber();
 	}
-	
+	public int hashCode() { 
+		String x=  this.getSubState(0)+";"+ this.getSavedSoldiersNumber()+";"+ this.getCarriedSoldiersNumber();	
+		return x.hashCode(); 
+	}
+	public boolean equals(Object e) {
+		GridState o = (GridState) e ; 
+		return this.areEqualPositions(this.getEthanPosition(), o.getEthanPosition())
+				&& this.getSavedSoldiersNumber() == o.getSavedSoldiersNumber()
+				&& this.getCarriedSoldiersNumber() == o.getCarriedSoldiersNumber(); 
+	}
+	public void visualize() { 
+		String [][] grid = new String [MissionImpossible.Height][MissionImpossible.Width] ;
+		for (int i = 0 ; i < grid.length ; ++i ) { 
+			for (int j = 0 ; j<grid[0].length;++j) { 
+				grid[i][j]= "." ; 
+			}
+		}
+		int [] members = this.getMembersPositions() ; 
+		int [] ethan = this.getEthanPosition() ; 
+		int [] sub = this.getSubmarinePosition() ; 
+		boolean ethanPrinted = false ; 
+		for (int i = 0 ; i <members.length ; i+= 2  ) { 
+			if (members[i]==-1)
+				continue; 
+			int [] mem = new int [] {members[i],members[i+1] } ; 
+			if (areEqualPositions(ethan, mem)) { 
+				grid[mem[0]][mem[1]] = "E+M" ;
+				ethanPrinted = true ; 
+			}
+			else  {
+				grid[mem[0]][mem[1]] = "M" ;
+			}
+		}
+		if (this.isEthanInSubmarine())
+			grid[sub[0]][sub[1]] = "E+S" ;
+		else {
+			if (!ethanPrinted)
+				grid[ethan[0]][ethan[1]] = "E" ;
+			grid[sub[0]][sub[1]] = "S" ;
+		}
+		String dash = "-".repeat(MissionImpossible.Width*5); 
+		for (int i = 0 ; i <grid.length ; ++i  ) { 
+			System.out.println(Arrays.toString(grid[i]));
+		}		
+		System.out.println(dash);
+
+		
+	}
 	
 
 }
