@@ -8,7 +8,7 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Stack;
 
-public class MissionImpossible extends GenericSearchProblem {
+public class MissionImpossible extends SearchProblem {
 
 	static int Width; 
 	static int Height ; 

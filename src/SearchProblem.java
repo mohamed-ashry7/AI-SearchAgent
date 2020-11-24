@@ -3,7 +3,7 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Stack;
 
-public abstract class GenericSearchProblem {
+public abstract class SearchProblem {
 	HashSet<State> container;
 	
 	abstract public Node search(Node root , String strategy)  ; 

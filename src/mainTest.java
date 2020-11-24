@@ -23,7 +23,8 @@ public class mainTest {
 //		h.add(e3) ;
 //		System.out.println(h.contains(new EnvironmentState("c")));
  		String grid1 = "5,5;1,2;4,0;0,3,2,1,3,0,3,2,3,4,4,3;20,30,90,80,70,60;3" ;
-		System.out.println(MissionImpossible.solve(grid1, "GR1", true));
+ 		String grid3  ="14,14;13,9;1,13;5,3,9,7,11,10,8,3,10,7,13,6,11,1,5,2;76,30,2,49,63,43,72,1;6";
+		System.out.println(MissionImpossible.solve(grid3, "BF", true));
 
 
 	}
