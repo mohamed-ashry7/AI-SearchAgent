@@ -46,7 +46,6 @@ public abstract class SearchProblem {
 			}
 			
 			Node front = stackNodes.pop();
-			container.add(front.state);
 			if (front.state.isGoal(front.action)) {
 				return front;
 			}
@@ -57,6 +56,7 @@ public abstract class SearchProblem {
 											// action.
 				Node child = expand(front, i);
 				if (!container.contains(child.state)) {
+					container.add(child.state);
 					stackNodes.push(child);
 				}
 			}

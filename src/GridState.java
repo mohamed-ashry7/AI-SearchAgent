@@ -141,9 +141,7 @@ public class GridState extends State implements Comparable<GridState> {
 	public GridState cloneState() {
 			return new GridState(this.state) ; 
 	}
-
-
-
+	
 	public int getSavedSoldiersNumber() {
 		int [] soldiers = this.getMembersPositions() ; 
 		int counter = 0 ; 
