@@ -16,13 +16,14 @@ public abstract class SearchProblem {
 				return null;
 			} else {
 				Node front = nodes.poll();
-				container.add(front.state);
+//				System.out.println(front.state.getStringState()+ "  " + front.state.hashCode());
 				if (front.state.isGoal(front.action)  ) {
 					return front;
 				} else {
 					for (int i = 0; i < 6; ++i) {
 						Node child = expand(front, i);
 						if (!container.contains(child.state)) {
+							container.add(child.state);
 							nodes.add(child);
 						}
 
@@ -97,15 +98,14 @@ public abstract class SearchProblem {
 				return null;
 			} else {
 				Node front = pq.poll();
-				container.add(front.state);
 //				System.out.println( front.action+" "+front.state.getHeuristicValueOne());
 				if (front.state.isGoal(front.action) ) {
 					return front;
 				} else {
 					for (int i = 0; i < 6; ++i) {
 						Node child = expand(front, i);
-						if (!container.contains(child.state)) {
-							
+						if (!container.contains(child.state)) {							
+							container.add(child.state);
 							pq.add(child);
 						}
 

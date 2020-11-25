@@ -1,6 +1,6 @@
 import java.util.Arrays;
 
-public class GridState extends State {
+public class GridState extends State implements Comparable<GridState> {
 
 	private String state ; 
 //	0   ;  1 ;   2   ;  3 
@@ -45,20 +45,14 @@ public class GridState extends State {
 		else {
 
 			if (action == 4 && this.getCarriedSoldiersNumber() < MissionImpossible.Capacity) {
-				
 				saveSoldierIfFound();
-//				System.out.println(this.getCarriedSoldiersNumber() == MissionImpossible.Capacity);
-
 			} else if (action == 5 && this.isEthanInSubmarine()) {
 				this.updateCarriedSoldiers(0);
 			}
 		}
 		this.updateDamages();
-		System.out.println(this.state);
-		this.visualize();
-//		System.out.println(this.state);
-		
-//		System.out.println(this.state);
+	
+
 	}
 	
 	public String getSubState(int index ) { 
@@ -198,16 +192,16 @@ public class GridState extends State {
 	public boolean areEqualPositions(int [] a , int [] b ) { 
 		return a[0] == b[0] && a[1]==b[1] ; 
 	}
-//	@Override
-//	public int compareTo(EnvironmentState o) {
-//		
-//		if (this.areEqualPositions(this.getEthanPosition(), o.getEthanPosition())
-//				&& this.getSavedSoldiersNumber() == o.getSavedSoldiersNumber()
-//				&& this.getCarriedSoldiersNumber() == o.getCarriedSoldiersNumber()) {
-//			return 0;
-//		}
-//		return 1;
-//	}
+	@Override
+	public int compareTo(GridState o) {
+		
+		if (this.areEqualPositions(this.getEthanPosition(), o.getEthanPosition())
+				&& this.getSavedSoldiersNumber() == o.getSavedSoldiersNumber()
+				&& this.getCarriedSoldiersNumber() == o.getCarriedSoldiersNumber()) {
+			return 0;
+		}
+		return 1;
+	}
 	public  double getEucDis(int[]  p1 , int [] p2) { 
 		int dis1 = p1[0]-p2[0];  
 		int dis2= p1[1]-p2[1] ; 
@@ -336,7 +330,7 @@ public class GridState extends State {
 				continue; 
 			int [] mem = new int [] {members[i],members[i+1] } ; 
 			if (areEqualPositions(ethan, mem)) { 
-				grid[mem[0]][mem[1]] = "E"+this.getCarriedSoldiersNumber()+"M" ;
+				grid[mem[0]][mem[1]] = "E"+this.getCarriedSoldiersNumber()+"+M" ;
 				ethanPrinted = true ; 
 			}
 			else  {
@@ -357,6 +351,11 @@ public class GridState extends State {
 		System.out.println(dash);
 
 		
+	}
+	
+	public String getStringState() { 
+		String xx=  this.getSubState(0)+";"+ this.getSavedSoldiersNumber()+";"+ this.getCarriedSoldiersNumber();	
+		return xx ;
 	}
 	
 
