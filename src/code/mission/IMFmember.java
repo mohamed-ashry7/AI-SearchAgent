@@ -1,3 +1,4 @@
+package code.mission;
 
 public class IMFmember implements Comparable<IMFmember> {
 		static int counter = 0;

@@ -1,3 +1,4 @@
+package code.mission;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -7,6 +8,8 @@ import java.util.LinkedList;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Stack;
+
+import code.generic.SearchProblem;
 
 public class MissionImpossible extends SearchProblem {
 
@@ -71,8 +74,8 @@ public class MissionImpossible extends SearchProblem {
 
 		String[] info = grid.split(";");
 		int[] mn = convertStringIntArr(info[0]);
-		Width = mn[0];
-		Height = mn[1];
+		Height = mn[0];
+		Width= mn[1];
 		SubmarinePosition = convertStringIntArr(info[2]);
 		Capacity = convertStringIntArr(info[5])[0];
 		String state = "" ; 
@@ -92,7 +95,6 @@ public class MissionImpossible extends SearchProblem {
 		GridState firstState = new GridState(state);
 		Node root = new Node(null, -1, 0, 0, firstState);
 		Node goalNode = mi.search(root,strategy) ; 
-		
 		return mi.formulateAnswer(goalNode , visualize) ; 
 	}
 	

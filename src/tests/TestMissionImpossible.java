@@ -1,8 +1,11 @@
-import static org.junit.Assert.*;
+package tests;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
+
+import code.mission.MissionImpossible;
 
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)

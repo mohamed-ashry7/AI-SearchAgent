@@ -1,10 +1,14 @@
+package code.generic;
 import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Stack;
 
+import code.mission.GridState;
+import code.mission.Node;
+
 public abstract class SearchProblem {
-	HashSet<State> container;
+	public HashSet<State> container;
 	
 	abstract public Node search(Node root , String strategy)  ; 
 	
@@ -16,7 +20,6 @@ public abstract class SearchProblem {
 				return null;
 			} else {
 				Node front = nodes.poll();
-//				System.out.println(front.state.getStringState()+ "  " + front.state.hashCode());
 				if (front.state.isGoal(front.action)  ) {
 					return front;
 				} else {

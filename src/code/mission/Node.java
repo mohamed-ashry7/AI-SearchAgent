@@ -1,11 +1,12 @@
+package code.mission;
 
 public class Node {
 	static long createdNodes = 0;
-	Node parent;
-	int action;
-	int depth;
-	double cost;
-	GridState state;
+	public Node parent;
+	public int action;
+	public int depth;
+	public double cost;
+	public GridState state;
 
 	public Node(Node parent, int action, int depth, double cost, GridState state) {
 		this.parent = parent;

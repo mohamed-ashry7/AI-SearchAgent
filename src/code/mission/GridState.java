@@ -1,4 +1,10 @@
+package code.mission;
+
+
 import java.util.Arrays;
+
+import code.generic.State;
+
 
 public class GridState extends State implements Comparable<GridState> {
 
@@ -235,31 +241,32 @@ public class GridState extends State implements Comparable<GridState> {
 	}
 	
 	public double getHeuristicValueTwo() {
-		
-		
-		
-		if (this.getRemainingMemberSize()== 0) { 
-			if (this.isEthanInSubmarine()) 
-				return 0 ; 
-			return this.getEucDis(this.getEthanPosition(),this.getSubmarinePosition());
+
+		if (this.getRemainingMemberSize() == 0) {
+			if (this.isEthanInSubmarine())
+				return 0;
+			return this.getEucDis(this.getEthanPosition(), this.getSubmarinePosition());
 		}
-		
-		double heuristicValue = Double.MAX_VALUE ; 
-		int [] members = this.getMembersPositions() ; 
-		int [] damages = this.getDamages() ; 
-		for (int i = 0 ; i < members.length; i+=2  ) { 
-			if (members[i] == -1) 
-				continue ; 
-			
-			double  health = (100 - damages[i/2])*0.01 ; 
-			if (health==0.0) { 
-				health =1000; 
+
+		double heuristicValue = Double.MAX_VALUE;
+		int[] members = this.getMembersPositions();
+		int[] damages = this.getDamages();
+		int[] ethan = this.getEthanPosition();
+		for (int i = 0; i < members.length; i += 2) {
+			if (members[i] == -1)
+				continue;
+
+			double damage = damages[i / 2];
+			if (damage == 100) {
+				damage = 1000;
+			} else {
+				double dis = this.getEucDis(new int[] { members[i], members[i + 1] }, ethan);
+				damage = (1.0/damage)*dis ;
 			}
-			
-			
-			heuristicValue=Math.min(health, heuristicValue) ;  
+
+			heuristicValue = Math.min(damage, heuristicValue);
 		}
-		return heuristicValue+this.getRemainingMemberSize()*2 ;  
+		return heuristicValue*Math.pow(this.getDeadSoldiersNumber(),2) + this.getRemainingMemberSize() * 2;
 	}
  	
 	
@@ -278,7 +285,6 @@ public class GridState extends State implements Comparable<GridState> {
 			return this.manhattenDistance(this.getEthanPosition(),this.getSubmarinePosition());
 		}
 		double actualDis = Double.MAX_VALUE ;
-		double deadNumber = this.getDeadSoldiersNumber() ;  
 		double damage = 0 ;
 		
 		
@@ -294,8 +300,8 @@ public class GridState extends State implements Comparable<GridState> {
   				damage =damages[i/2] ;  
   			}
 		}
-		
-		return deadNumber+ actualDis + 0.1*damage ; 
+//		return 1 ;
+		return actualDis/damage +damage*Math.pow(this.getDeadSoldiersNumber(), 2) +this.getRemainingMemberSize()*2 ; 
 	}
 	
 	public String toString() {

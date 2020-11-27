@@ -1,3 +1,4 @@
+package code.mission;
 
 public class Position implements Comparable<Position>, Cloneable {
 	int x;
